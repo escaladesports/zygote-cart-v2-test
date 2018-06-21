@@ -229,6 +229,7 @@ export default css`
       transform: rotate(35deg);
     }
   }
+
   .zygoteEscaAdd {
     margin-right: 8px;
     text-align: center;

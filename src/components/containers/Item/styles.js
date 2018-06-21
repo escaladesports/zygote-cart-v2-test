@@ -1,4 +1,4 @@
-import css from 'styled-jsx/css';
+import css from 'styled-jsx/css'
 
 export default css`
   .zygoteProd {
@@ -20,12 +20,10 @@ export default css`
   .zygoteIncrease {
     text-align: center;
     cursor: pointer;
-    width: 20px;
-    height: 20px;
     font-weight: 300;
     font-size: 1.7em;
     line-height: 0.7em;
-    display: inline-block;
+    display: inline;
   }
   .zygoteDecrease {
     margin-right: 8px;
@@ -94,4 +92,4 @@ export default css`
   .zygoteStep4 .zygoteProd div:nth-child(3) {
     text-align: right;
   }
-`;
+`

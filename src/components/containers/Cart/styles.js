@@ -11,10 +11,17 @@ export default css`
     position: absolute;
     top: 0;
     overflow-x: auto;
+    overflow: auto;
     transform: translateX(100%);
     transition: transform 0.25s linear;
   }
   .zygoteModalAction {
     transform: translateX(0%);
+  }
+
+  @media (max-width: 500px) {
+    .zygoteModal {
+      width: 100vw;
+    }
   }
 `
