@@ -22,7 +22,7 @@ export default css`
     font-size: 1.4em;
     color: rgb(0, 207, 255);
   }
-  .zygoteCouponCode > input {
+  .zygoteCouponCode form input {
     font-size: 0.7em;
     padding: 7px;
     border-radius: 6px;

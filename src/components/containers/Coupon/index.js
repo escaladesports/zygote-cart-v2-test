@@ -26,10 +26,12 @@ export default class Coupon extends Component {
     }
 
     const { preOrderInfo } = userInfo.state
-    if (itemState.state.coupon && preOrderInfo) {
+    if (itemState.state.coupon) {
       let updated = {}
-      updated.site = preOrderInfo.site
-      updated.cartId = preOrderInfo.cartId
+      if (preOrderInfo) {
+        updated.site = preOrderInfo.site
+        updated.cartId = preOrderInfo.cartId
+      }
       updated.addCoupon = itemState.state.coupon
       this.setState({ loading: true })
       const couponRes = await fetch(zygoteApi.state.api, {
@@ -59,19 +61,28 @@ export default class Coupon extends Component {
         if (couponRes.errors.length > 0) {
           itemState.setState({ coupon: '', couponErr: couponRes.errors[0] })
         } else if (couponRes.errors.length === 0) {
-          const coupon =
-            couponRes.coupons[itemState.state.coupon.toUpperCase()]
-              .discount_amount.value
-          const rawValue = parseFloat(coupon.replace(/\$|-/g, ''))
-          this.setState({ show: false })
-          itemState.setState({
-            couponErr: null,
-            couponValue: rawValue
-          })
-          cost.setState({ coupon: rawValue })
-        }
-        if (itemState.state.couponValue && !itemState.state.couponErr) {
-          this.setState({ loading: false })
+          if (couponRes.coupons) {
+            const coupon =
+              couponRes.coupons[itemState.state.coupon.toUpperCase()]
+                .discount_amount.value
+            const rawValue = parseFloat(coupon.replace(/\$|-/g, ''))
+            this.setState({ show: false })
+            itemState.setState({
+              couponErr: null,
+              couponValue: rawValue
+            })
+            cost.setState({ coupon: rawValue })
+            if (itemState.state.couponValue && !itemState.state.couponErr) {
+              this.setState({ loading: false })
+            }
+          } else {
+            itemState.setState({
+              coupon: '',
+              couponErr:
+                'That coupon does not exist with the current information given'
+            })
+            this.setState({ loading: false })
+          }
         }
       } else {
         itemState.setState({
@@ -152,7 +163,7 @@ export default class Coupon extends Component {
     if (coupon) {
       this.handleCoupon()
     }
-
+    itemState.setState({ couponErr: null })
     itemState.subscribe(this.checkItems)
     userInfo.subscribe(this.checkUser)
   }
@@ -182,18 +193,20 @@ export default class Coupon extends Component {
 
             {this.state.show ? (
               <div className="zygoteCouponCode">
-                <input
-                  type="text"
-                  ref={input => (this.coupon = input)}
-                  name="zygoteCouponCode"
-                  placeholder={'Enter Coupon Code...'}
-                />
-                <button
-                  onClick={() => this.handleCoupon()}
-                  className="zygoteCouponButton"
-                >
-                  Apply
-                </button>
+                <form action="#">
+                  <input
+                    type="text"
+                    ref={input => (this.coupon = input)}
+                    name="zygoteCouponCode"
+                    placeholder={'Enter Coupon Code...'}
+                  />
+                  <button
+                    onClick={() => this.handleCoupon()}
+                    className="zygoteCouponButton"
+                  >
+                    Apply
+                  </button>
+                </form>
               </div>
             ) : (
               <div>
@@ -221,7 +234,6 @@ export default class Coupon extends Component {
                     <span
                       className="zygoteRemoveCoupon"
                       onClick={() => {
-                        this.setState({ show: false })
                         this.handleRemoveCoupon()
                       }}
                     >

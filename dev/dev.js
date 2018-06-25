@@ -11,10 +11,19 @@ const brandLogo =
   'https://cdn.pixabay.com/photo/2018/05/21/22/44/logo-3419889_1280.png'
 
 const containerEl = document.createElement('div')
+const string = 'Hello World...'
+const arr = string.split('')
 document.body.appendChild(containerEl)
 zygote.site('goalrilla')
 render(
   <div>
+    <div style={{ height: '30px' }}>
+      {arr.map((letter, i) => (
+        <div key={i} className={`test test${i}`}>
+          {letter}
+        </div>
+      ))}
+    </div>
     <button onClick={() => zygote.toggleCart()}>Toggle</button>
 
     <AddToCart
@@ -102,6 +111,63 @@ render(
       // paymentButtonMessage={'give us money'}
       // orderCompleteMessage={'just bought from the best store ever'}
     />
+    <style jsx>{`
+      .test {
+        display: inline-block;
+        color: blue;
+        animation: test 1s ease-in-out infinite alternate;
+      }
+      .test0 {
+        animation-delay: 0;
+      }
+      .test1 {
+        animation-delay: 0.25s;
+      }
+      .test2 {
+        animation-delay: 0.5s;
+      }
+      .test3 {
+        animation-delay: 0.75s;
+      }
+      .test4 {
+        animation-delay: 1s;
+      }
+      .test5 {
+        animation-delay: 1.25s;
+      }
+      .test6 {
+        animation-delay: 1.5s;
+      }
+      .test7 {
+        animation-delay: 1.75s;
+      }
+      .test8 {
+        animation-delay: 2s;
+      }
+      .test9 {
+        animation-delay: 2.25s;
+      }
+      .test10 {
+        animation-delay: 2.5s;
+      }
+      .test11 {
+        animation-delay: 2.75s;
+      }
+      .test12 {
+        animation-delay: 3s;
+      }
+      .test13 {
+        animation-delay: 3.25s;
+      }
+      @keyframes test {
+        from {
+          font-size: 1em;
+        }
+        to {
+          font-size: 1.5em;
+        }
+      }
+    `}</style>
   </div>,
   containerEl
 )

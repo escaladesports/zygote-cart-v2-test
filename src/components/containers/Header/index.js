@@ -31,8 +31,8 @@ export default class Header extends Component {
 
   render() {
     return (
-      <Subscribe to={cartState}>
-        {state => (
+      <Subscribe to={[cartState, itemState]}>
+        {(state, itemObj) => (
           <div className="zygoteHeader">
             <div className="zygoteClose" onClick={() => this.checkState()}>
               ×
@@ -44,7 +44,7 @@ export default class Header extends Component {
                 <div className="zygoteDefaultBrandLogo">Brand Logo</div>
               )}
             </div>
-            {state.tab === 1 ? (
+            {itemObj.items.length === 0 ? null : state.tab === 1 ? (
               <Nav />
             ) : state.tab === 2 ? (
               <Nav />
