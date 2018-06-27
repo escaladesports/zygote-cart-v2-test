@@ -7,6 +7,7 @@ import styles from './styles'
 export default class Total extends Component {
   componentDidMount() {
     const { total, subtotal, tax, shipping, coupon } = cost.state
+
     const sum = parseFloat((subtotal + tax + shipping - coupon).toFixed(2))
     if (total !== sum) {
       cost.setState({

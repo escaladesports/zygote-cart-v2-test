@@ -2,18 +2,16 @@ import css from 'styled-jsx/css'
 
 export default css`
   .zygoteOrderSummaryContainer {
+    padding: 20px;
+    margin: -20px -20px 0 -20px;
     background-color: #f8f8f8;
     border: 1px solid #e8e9e9;
     border-top: none;
-    padding: 15px;
-    margin: -20px -20px 20px -20px;
+    overflow: hidden;
+    transform: translateY(-0%);
+    transition: all 0.25s ease-in-out;
   }
-  .zygoteAnimate {
-    transform: translateY(-100%);
-    transform-origin: top;
-    transition: transform 0.25s ease-in-out;
-  }
-  .zygoteAnimMount {
+  .zygoteAnim {
     transform: translateY(0%);
   }
 `

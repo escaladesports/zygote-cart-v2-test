@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { Subscribe } from 'statable'
-import FaEdit from 'react-icons/lib/fa/edit'
 import { FoldingCube } from 'better-react-spinkit'
 
 import { itemState, cartState, userInfo, zygoteApi, cost } from '../../state'
 import styles from './styles'
+import { arrsAreEqual } from '../../utils/compare'
 
 export default class Coupon extends Component {
   constructor(props) {
@@ -12,27 +12,28 @@ export default class Coupon extends Component {
     this.state = {
       show: false,
       loading: false,
-      items: itemState.state.items
+      coupon: null,
+      items: []
     }
     this.handleCoupon = this.handleCoupon.bind(this)
     this.handleRemoveCoupon = this.handleRemoveCoupon.bind(this)
     this.checkItems = this.checkItems.bind(this)
-    this.checkUser = this.checkUser.bind(this)
+    this.onChange = this.onChange.bind(this)
   }
 
   async handleCoupon() {
-    if (!itemState.state.coupon && this.coupon) {
-      itemState.setState({ coupon: this.coupon.value })
-    }
-
     const { preOrderInfo } = userInfo.state
-    if (itemState.state.coupon) {
+    if (this.state.coupon || itemState.state.coupon) {
       let updated = {}
       if (preOrderInfo) {
-        updated.site = preOrderInfo.site
         updated.cartId = preOrderInfo.cartId
+      } else {
+        updated.products = itemState.state.items
       }
-      updated.addCoupon = itemState.state.coupon
+      updated.site = cartState.state.site
+      updated.addCoupon = this.state.coupon || itemState.state.coupon
+      console.log(updated)
+
       this.setState({ loading: true })
       const couponRes = await fetch(zygoteApi.state.api, {
         body: JSON.stringify(updated),
@@ -40,6 +41,9 @@ export default class Coupon extends Component {
       })
         .then(res => res.json())
         .catch(err => {
+          itemState.setState({
+            couponErr: `${err}`
+          })
           let error = ''
           if (
             err.request &&
@@ -50,30 +54,88 @@ export default class Coupon extends Component {
             error =
               'Something went wrong with the request, no response was given.'
           } else {
-            error = err.response || JSON.stringify(err) || err
+            error = JSON.stringify(err) || err || err.response
           }
           cartState.setState({
             apiErrors: [error],
             loading: false
           })
         })
+
+      if (!couponRes) {
+        itemState.setState({
+          couponErr: 'Could not get response from server for Coupon'
+        })
+        return
+      }
       if (couponRes) {
+        if (preOrderInfo) {
+          userInfo.setState({
+            preOrderInfo: {
+              ...userInfo.state.preOrderInfo,
+              cartId: couponRes.cartId
+            }
+          })
+        }
+        if (couponRes.products) {
+          const { items, coupon } = itemState.state
+
+          couponRes.products.forEach(product => {
+            const regexp = new RegExp(product.id, 'gi')
+            const updatedItem = items.find(({ id }) => regexp.test(id))
+
+            if (!updatedItem) {
+              console.warn('Item not found and being removed from the array')
+              const index = itemState.state.items.indexOf(updatedItem)
+              const updated = [...itemState.state.items]
+              updated.splice(index, 1)
+              itemState.setState({
+                items: updated
+              })
+              return
+            }
+            updatedItem.price = product.price
+            itemState.setState({
+              items: itemState.state.items.map(
+                item => (item.id === product.id ? updatedItem : item)
+              )
+            })
+            if (preOrderInfo) {
+              if (!preOrderInfo.products) {
+                userInfo.setState({
+                  preOrderInfo: {
+                    ...userInfo.state.preOrderInfo,
+                    products: itemState.state.items.map(
+                      item => (item.id === product.id ? updatedItem : item)
+                    )
+                  }
+                })
+              }
+            }
+          })
+        }
         if (couponRes.errors.length > 0) {
           itemState.setState({ coupon: '', couponErr: couponRes.errors[0] })
+          this.setState({ loading: false })
         } else if (couponRes.errors.length === 0) {
           if (couponRes.coupons) {
             const coupon =
-              couponRes.coupons[itemState.state.coupon.toUpperCase()]
-                .discount_amount.value
+              couponRes.coupons[
+                (this.state.coupon || itemState.state.coupon).toUpperCase()
+              ].discount_amount.value
             const rawValue = parseFloat(coupon.replace(/\$|-/g, ''))
-            this.setState({ show: false })
             itemState.setState({
               couponErr: null,
               couponValue: rawValue
             })
+            if (!itemState.state.coupon) {
+              itemState.setState({
+                coupon: this.state.coupon
+              })
+            }
             cost.setState({ coupon: rawValue })
             if (itemState.state.couponValue && !itemState.state.couponErr) {
-              this.setState({ loading: false })
+              this.setState({ loading: false, show: false })
             }
           } else {
             itemState.setState({
@@ -84,77 +146,71 @@ export default class Coupon extends Component {
             this.setState({ loading: false })
           }
         }
-      } else {
-        itemState.setState({
-          couponErr: 'Could not get response from server for Coupon'
-        })
       }
     }
   }
 
   async handleRemoveCoupon() {
     const { preOrderInfo } = userInfo.state
+    let updated = {}
     if (preOrderInfo) {
-      let updated = {}
-      updated.site = preOrderInfo.site
       updated.cartId = preOrderInfo.cartId
-      updated.removeCoupon = itemState.state.coupon
-      this.setState({ loading: true })
+    }
+    updated.site = cartState.state.site
+    updated.addCoupon = itemState.state.coupon
+    updated.products = itemState.state.items
+    this.setState({ loading: true })
 
-      const couponRes = await fetch(zygoteApi.state.api, {
-        body: JSON.stringify(updated),
-        method: 'POST'
-      })
-        .then(res => res.json())
-        .catch(err => {
-          let error = ''
-          if (
-            err.request &&
-            (err.request.status === 404 || err.request.status === 502)
-          ) {
-            error = `Error with API: ${err.response.statusText}`
-          } else if (err.request && err.request.status === 0 && !err.response) {
-            error =
-              'Something went wrong with the request, no response was given.'
-          } else {
-            error = err.response || JSON.stringify(err) || err
-          }
-          cartState.setState({
-            apiErrors: [error],
-            loading: false
-          })
-        })
-      if (couponRes) {
-        if (couponRes.errors.length > 0) {
-          itemState.setState({ coupon: '', couponErr: couponRes.errors[0] })
-        } else if (couponRes.errors.length === 0) {
-          this.setState({ show: false })
-          itemState.setState({
-            couponErr: null,
-            couponValue: 0,
-            coupon: ''
-          })
-          cost.setState({ coupon: 0 })
+    const couponRes = await fetch(zygoteApi.state.api, {
+      body: JSON.stringify(updated),
+      method: 'POST'
+    })
+      .then(res => res.json())
+      .catch(err => {
+        let error = ''
+        if (
+          err.request &&
+          (err.request.status === 404 || err.request.status === 502)
+        ) {
+          error = `Error with API: ${err.response.statusText}`
+        } else if (err.request && err.request.status === 0 && !err.response) {
+          error =
+            'Something went wrong with the request, no response was given.'
+        } else {
+          error = JSON.stringify(err) || err || err.response
         }
-        this.setState({ loading: false })
-      } else {
-        itemState.setState({
-          couponErr: 'Could not get response from server for Coupon'
+        cartState.setState({
+          apiErrors: [error],
+          loading: false
         })
+      })
+    if (couponRes) {
+      if (couponRes.errors.length > 0) {
+        itemState.setState({ coupon: '', couponErr: couponRes.errors[0] })
+      } else if (couponRes.errors.length === 0) {
+        this.setState({ show: false })
+        itemState.setState({
+          couponErr: null,
+          couponValue: 0,
+          coupon: ''
+        })
+        cost.setState({ coupon: 0 })
+        userInfo.setState({ preOrderInfo: null })
+        this.setState({ loading: false })
       }
+    } else {
+      itemState.setState({
+        couponErr: 'Could not get response from server for Coupon'
+      })
     }
   }
 
   checkItems(state) {
-    if (state.items !== this.state.items) {
+    const newQtys = state.items.map(item => item.qty)
+    const same = arrsAreEqual(newQtys, this.state.items)
+    if (!same) {
       this.handleCoupon()
-      this.setState({ items: state.items })
-    }
-  }
-
-  checkUser(state) {
-    if (state.preOrderInfo) {
-      this.handleCoupon()
+      this.setState({ items: newQtys })
     }
   }
 
@@ -164,13 +220,16 @@ export default class Coupon extends Component {
       this.handleCoupon()
     }
     itemState.setState({ couponErr: null })
-    itemState.subscribe(this.checkItems)
-    userInfo.subscribe(this.checkUser)
+    // itemState.subscribe(this.checkItems)
   }
 
   componentWillUnmount() {
-    itemState.unsubscribe(this.checkItems)
-    userInfo.unsubscribe(this.checkUser)
+    console.log('Will unmount')
+    // itemState.unsubscribe(this.checkItems)
+  }
+
+  onChange(e) {
+    this.setState({ coupon: e.target.value })
   }
 
   render() {
@@ -199,6 +258,7 @@ export default class Coupon extends Component {
                     ref={input => (this.coupon = input)}
                     name="zygoteCouponCode"
                     placeholder={'Enter Coupon Code...'}
+                    onChange={this.onChange}
                   />
                   <button
                     onClick={() => this.handleCoupon()}

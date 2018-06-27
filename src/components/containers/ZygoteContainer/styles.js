@@ -87,7 +87,7 @@ export default css`
     padding: 0;
   }
   .zygoteSection:first-of-type {
-    margin-bottom: 50px;
+    margin-bottom: 45px;
   }
   .zygoteSection input,
   select {
@@ -97,15 +97,44 @@ export default css`
     height: 40px;
     padding: 10px;
     border: solid 1px #e8e9e9;
-    margin-bottom: 20px;
     outline: none;
     width: 100%;
     border-radius: 5px;
     background-color: #f8f8f8;
+    & ::placeholder {
+      color: transparent;
+    }
   }
   .zygoteSection input:focus {
     border: 1px solid #333;
     box-shadow: none;
+    & ::placeholder {
+      color: #666667;
+    }
+  }
+  .zygoteInputErr input:focus ::placeholder {
+    color: #f00;
+  }
+  .zygoteInputWrapper {
+    position: relative;
+    margin-top: 30px;
+  }
+  .zygoteInputLabel {
+    cursor: auto;
+    font-size: 0.75em;
+    z-index: 1;
+    color: #666667;
+    position: absolute;
+    top: -20px;
+    left: 5px;
+    transform: translate(5px, 32px);
+    transition: transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  }
+  .zygoteAnimLabel {
+    transform: translate(0, 0) scale(0.85);
+  }
+  .zygoteInputErr .zygoteInputLabel {
+    color: #f00;
   }
   .zygoteCouponLine:after,
   .zygoteShipLine:after,
@@ -133,14 +162,6 @@ export default css`
     background-color: rgba(255, 0, 0, 0.1);
     color: #f00;
     margin-bottom: 0;
-  }
-  .zygoteShippingAddressContainer input ::placeholder {
-    color: #b7b7b7;
-    font-style: oblique;
-  }
-  .zygoteInputErr input ::placeholder,
-  .zygoteInputErr select ::placeholder {
-    color: #f00;
   }
   .zygoteMsgs > div {
     padding: 7px 10px;
@@ -170,7 +191,7 @@ export default css`
     font-size: 1.05em;
     font-weight: 300;
   }
-  .zygoteSection label {
+  .zygoteCheckboxContainer label {
     font-size: 0.6em;
     display: inline-block;
     cursor: pointer;
@@ -263,21 +284,23 @@ export default css`
     float: right;
   }
   .zygoteToggleFieldContainer {
-    margin-bottom: 20px;
   }
-  .zygoteShippingCityContainer,
-  .zygoteBillingCityContainer {
-    width: 68%;
+  .zygoteBillingCityContainer,
+  .zygoteShippingCityContainer {
+    width: 40%;
     float: left;
+    margin-right: 5%;
   }
-  .zygoteShippingStateContainer,
-  .zygoteBillingStateContainer {
-    width: 27%;
-    float: right;
+  .zygoteBillingStateContainer,
+  .zygoteShippingStateContainer {
+    width: 25%;
+    float: left;
+    margin-right: 5%;
   }
-  .zygoteShippingZipContainer,
-  .zygoteBillingZipContainer {
-    width: 27%;
+  .zygoteBillingZipContainer,
+  .zygoteShippingZipContainer {
+    width: 25%;
+    float: left;
   }
   .zygoteSection > div {
     &:after,
@@ -285,6 +308,22 @@ export default css`
       content: '';
       clear: both;
       display: block;
+    }
+  }
+  .zygoteForm > div {
+    & :after,
+    :before {
+      content: '';
+      clear: both;
+      display: block;
+    }
+    & > div {
+      & :after,
+      :before {
+        content: '';
+        clear: both;
+        display: block;
+      }
     }
   }
   .zygoteLoading {

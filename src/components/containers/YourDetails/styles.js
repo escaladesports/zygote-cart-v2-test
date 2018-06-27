@@ -22,14 +22,6 @@ export default css`
       transform: translateY(calc(50%));
     }
   }
-  .zygoteOrderSummary {
-    padding: 20px 20px 0px 20px;
-    margin: -20px -20px 0px -20px;
-    overflow-y: hidden;
-    position: absolute;
-    left: 20px;
-    right: 20px;
-  }
   .zygoteTotalPreview {
     float: right;
   }
@@ -43,23 +35,6 @@ export default css`
   .zygoteStep2 {
     margin-bottom: 50px;
   }
-  .zygoteRowAnim {
-    margin-top: 50px;
-    transform: translateY(0%);
-    transition: all 0.25s ease;
-  }
-  .zygoteRowAnimAction {
-    transform: translateY(55%);
-    margin-bottom: 77%;
-  }
-  .zygoteShippingCity::placeholder,
-  .zygoteShippingStateContainer select,
-  .zygoteShippingZip::placeholder,
-  .zygoteShippingCompanyName::placeholder,
-  .zygoteShippingApt::placeholder {
-    color: #b7b7b7;
-    font-style: oblique;
-  }
   .zygoteInputErr input,
   .zygoteInputErr input:focus,
   .zygoteInputErr select,
@@ -69,8 +44,20 @@ export default css`
     color: #f00;
     margin-bottom: 0;
   }
-  .zygoteInputErr input ::placeholder,
-  .zygoteInputErr select ::placeholder {
-    color: #f00;
+  .zygoteRowAnim {
+    margin-top: -100%;
+    transition: margin 0.25s ease-in-out;
+  }
+  .zygoteAnim {
+    margin-top: 0%;
+    margin-bottom: 25px;
+  }
+  .zygoteCheckboxContainer {
+    margin-top: 20px;
+  }
+  .overflowWrapper {
+    margin: -20px -20px 0px -20px;
+    overflow: hidden;
+    padding: 20px 20px 0 20px;
   }
 `

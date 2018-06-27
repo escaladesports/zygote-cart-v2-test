@@ -12,14 +12,14 @@ const yourPayment = {
           class: 'zygoteBillingNumber',
           name: 'Number',
           formattedName: 'billingNumber',
-          type: 'text'
+          type: 'tel'
         },
         {
           label: 'MM/YY',
           class: 'zygoteBillingExpiration',
           name: 'Expiration',
           formattedName: 'billingExpiration',
-          type: 'text'
+          type: 'tel'
         },
         {
           label: 'CVV',
@@ -120,11 +120,10 @@ const yourDetails = {
           class: 'zygoteShippingEmail',
           name: 'Email',
           formattedName: 'shippingEmail',
-          type: 'text'
+          type: 'email'
         },
         {
           label: 'Phone',
-          span: '(for shipping related questions)',
           class: 'zygoteShippingPhone',
           name: 'Phone',
           formattedName: 'shippingPhone',

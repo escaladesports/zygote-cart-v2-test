@@ -58,7 +58,7 @@ export default class ShippingOptions extends Component {
           error =
             'Something went wrong with the request, no response was given.'
         } else {
-          error = err.response || JSON.stringify(err) || err
+          error = JSON.stringify(err) || err || err.response
         }
         cartState.setState({
           apiErrors: [error],
@@ -98,26 +98,34 @@ export default class ShippingOptions extends Component {
 
   async componentDidMount() {
     if (cartState.state.tab === 2) {
-      const { shipping } = userInfo.state
-      const { items, coupon } = itemState.state
+      const { shipping, preOrderInfo } = userInfo.state
+      const { items } = itemState.state
       let updated = { ...shipping }
+
       const names = updated.shippingFullName.split(' ')
       updated.shippingFirst = names[0]
       updated.shippingLast = names[1]
       delete updated.shippingFullName
-      updated.site = cartState.state.site
-      updated.products = items
-      updated.couponCode = coupon
+      if (preOrderInfo) {
+        updated.cartId = preOrderInfo.cartId
+        updated.site = preOrderInfo.site
+      } else {
+        updated.site = cartState.state.site
+        updated.products = items
+      }
       updated.addressSame = userInfo.state.addressSame
       cartState.setState({
         loading: true
       })
+      console.log(updated)
+      return
       const shippingRes = await fetch(zygoteApi.state.api, {
         body: JSON.stringify(updated),
         method: 'POST'
       })
         .then(res => res.json())
         .catch(err => {
+          console.log(err)
           let error = ''
           if (
             err.request &&
@@ -128,14 +136,15 @@ export default class ShippingOptions extends Component {
             error =
               'Something went wrong with the request, no response was given.'
           } else {
-            error = err.response || JSON.stringify(err) || err
+            error = `${err}` || err || err.response
           }
           cartState.setState({
             apiErrors: [error],
             loading: false
           })
         })
-
+      console.log(shippingRes)
+      return
       shippingRes.products.forEach(product => {
         const regexp = new RegExp(product.id, 'gi')
         const updatedItem = items.find(({ id }) => regexp.test(id))
@@ -158,7 +167,6 @@ export default class ShippingOptions extends Component {
         })
       })
       updated.shippingOptions = shippingRes.shippingOptions
-
       if (updated.shippingOptions) {
         Object.keys(updated.shippingOptions).forEach(k => {
           this.setState({
@@ -169,9 +177,9 @@ export default class ShippingOptions extends Component {
             : { [k]: 0 }
         })
       }
-
-      updated.success = shippingRes.success
-      updated.cartId = shippingRes.cartId
+      if (!updated.cartId) {
+        updated.cartId = shippingRes.cartId
+      }
       updated.locations = shippingRes.locations
       userInfo.setState({
         preOrderInfo: updated
@@ -261,8 +269,8 @@ export default class ShippingOptions extends Component {
                                 <div key={i}>
                                   for{' '}
                                   {shipOptions.type === 'freight'
-                                    ? 'Large'
-                                    : 'Small'}{' '}
+                                    ? 'large'
+                                    : 'small'}{' '}
                                   {product.name} from{' '}
                                   {k.charAt(0).toUpperCase() + k.slice(1)}
                                 </div>

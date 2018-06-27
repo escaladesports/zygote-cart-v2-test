@@ -26,22 +26,7 @@ export default css`
   .zygoteStep3 {
     margin: 30px 0 20px 0;
   }
-  .zygoteAnim {
-    transform: translateY(-100%);
-    transform-origin: top;
-    transition: all 0.25s linear;
-  }
-  .zygoteAnimAction {
-    transform: translateY(-10%);
-  }
-  .zygoteBillingInfo {
-    padding: 20px 20px 0px 20px;
-    margin: -20px -20px 0px -20px;
-    overflow-y: hidden;
-    position: absolute;
-    left: 20px;
-    right: 20px;
-  }
+
   .zygoteStep3 .zygoteOrderSummaryContainer {
     margin: 10px auto;
     background-color: #fff;
@@ -56,6 +41,20 @@ export default css`
     top: 10px;
     right: 20px;
   }
+  .zygoteBillingCityContainer {
+    width: 40%;
+    float: left;
+    margin-right: 5%;
+  }
+  .zygoteBillingStateContainer {
+    width: 25%;
+    float: left;
+    margin-right: 5%;
+  }
+  .zygoteBillingZipContainer {
+    width: 25%;
+    float: left;
+  }
   .zygotePaymentLineWrapper {
     float: right;
     margin-top: -10px;
@@ -68,18 +67,25 @@ export default css`
   }
   .zygoteBillingSecurityContainer {
     width: 47.5%;
-    float: right;
+    float: left;
+    margin-bottom: 20px;
+    &.zygoteInputErr {
+      margin-bottom: 0px;
+    }
   }
   .zygoteCheckboxContainer {
+    margin-top: 20px;
     clear: both;
   }
-  .zygoteRowAnim {
-    margin-top: 50px;
-    transform: translateY(0%);
-    transition: all 0.25s ease;
+
+  .overflowWrapper {
+    overflow: hidden;
   }
-  .zygoteRowAnimAction {
-    transform: translateY(55%);
-    margin-bottom: 95%;
+  .zygoteBillingInfo {
+    margin-top: -90%;
+    transition: margin 0.25s ease-in-out;
+  }
+  .zygoteAnim {
+    margin-top: 0%;
   }
 `

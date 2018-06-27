@@ -2,7 +2,7 @@ import { State } from 'statable'
 import Cookie from 'js-cookie'
 
 const cartState = new State({
-  open: true,
+  open: false,
   tab: 0,
   errors: null,
   apiErrors: null,
@@ -36,7 +36,7 @@ const itemState = new State(
             url: 'https://pingpong.comproduct/t1265'
           }
         ],
-        coupon: '',
+        coupon: null,
         couponErr: null,
         couponValue: 0
       }

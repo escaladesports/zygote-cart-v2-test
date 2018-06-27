@@ -56,11 +56,7 @@ class OrderSummary extends Component {
     return (
       <Subscribe to={itemState}>
         {state => (
-          <div
-            className={`zygoteOrderSummaryContainer zygoteCouponLine ${
-              this.props.isMounted ? this.state.class : ''
-            } ${this.props.animate ? 'zygoteAnimate' : ''}`}
-          >
+          <div className={`zygoteOrderSummaryContainer zygoteCouponLine`}>
             <Item />
             <div className="zygoteSubFieldsContainer">
               <div className="zygoteSubFields">
@@ -82,4 +78,4 @@ class OrderSummary extends Component {
     )
   }
 }
-export default AnimateHOC(OrderSummary)
+export default OrderSummary

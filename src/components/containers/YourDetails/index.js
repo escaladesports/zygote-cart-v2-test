@@ -16,26 +16,17 @@ export default class Shipping extends Component {
     this.state = {
       checked: true,
       showSummary: false,
-      inputErrors: {},
-      class: ''
+      inputErrors: {}
     }
     this.update = this.update.bind(this)
     this.renderField = this.renderField.bind(this)
     this.handleCheck = this.handleCheck.bind(this)
     this.onKeyPress = this.onKeyPress.bind(this)
     this.addressSearch = this.addressSearch.bind(this)
+    this.validate = this.validate.bind(this)
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (!prevState.showSummary && this.state.showSummary) {
-      setTimeout(() => {
-        this.setState({ class: 'zygoteRowAnimAction' })
-      }, 0)
-    }
-    if (prevState.showSummary && !this.state.showSummary) {
-      this.setState({ class: '' })
-    }
-
     if (typeof cartState.state.errors === 'object') {
       if (this.state.inputErrors === cartState.state.errors) {
         return
@@ -70,15 +61,12 @@ export default class Shipping extends Component {
     }
   }
 
-  update(e) {
-    e.preventDefault()
+  validate(e) {
     const { value } = e.target
     const { inputErrors } = this.state
     let updatedErrs = { ...inputErrors }
     const name = `shipping${e.target.name.replace(/\s/g, '')}`
-    userInfo.setState({
-      shipping: { ...userInfo.state.shipping, [name]: value }
-    })
+
     if (value.length === 0) {
       updatedErrs[name] = name => `Please enter a valid ${name}`
     } else if (value.length > 0) {
@@ -117,8 +105,18 @@ export default class Shipping extends Component {
     this.setState({ inputErrors: updatedErrs })
   }
 
+  update(e) {
+    e.preventDefault()
+    const { value } = e.target
+    const name = `shipping${e.target.name.replace(/\s/g, '')}`
+    userInfo.setState({
+      shipping: { ...userInfo.state.shipping, [name]: value }
+    })
+  }
+
   renderField(field, i, user) {
     const { inputErrors } = this.state
+    const inputValue = user.shipping[field.formattedName]
     switch (field.type) {
       case 'checkbox':
         return (
@@ -162,17 +160,35 @@ export default class Shipping extends Component {
                   ? 'zygoteInputErr'
                   : ''
                 : ''
-            } ${field.class}Container zygoteToggleFieldWrapper`}
+            } ${
+              field.class
+            }Container zygoteToggleFieldWrapper zygoteInputWrapper`}
           >
-            {this.state[field.name] ? (
+            {this.state[`toggle${field.name}`] ? (
+              <label
+                aria-required="false"
+                htmlFor={field.name}
+                className={`zygoteInputLabel ${
+                  this.state[field.name] || inputValue ? 'zygoteAnimLabel' : ''
+                }`}
+              >
+                {field.label} {field.span ? field.span : null}
+              </label>
+            ) : null}
+
+            {this.state[`toggle${field.name}`] ? (
               <div>
                 <input
                   type="text"
+                  id={field.name}
                   className={field.class}
                   name={field.name}
                   onChange={this.update}
-                  value={user.shipping[field.formattedName]}
+                  value={inputValue}
+                  onFocus={() => this.setState({ [field.name]: true })}
+                  onBlur={() => this.setState({ [field.name]: false })}
                   placeholder={`${field.label} ${field.span ? field.span : ''}`}
+                  autoFocus
                 />
                 {inputErrors ? (
                   inputErrors[field.formattedName] ? (
@@ -187,7 +203,7 @@ export default class Shipping extends Component {
                 className="zygoteToggleFieldContainer"
                 onClick={() =>
                   this.setState({
-                    [field.name]: !this.state[field.name]
+                    [`toggle${field.name}`]: !this.state[`toggle${field.name}`]
                   })
                 }
               >
@@ -208,21 +224,29 @@ export default class Shipping extends Component {
                   ? 'zygoteInputErr'
                   : ''
                 : ''
-            } ${field.class}Container zygoteSelect`}
+            } ${field.class}Container zygoteSelect zygoteInputWrapper`}
           >
+            <label
+              aria-required="false"
+              htmlFor={field.name}
+              className={`zygoteInputLabel ${
+                this.state[field.name] || inputValue ? 'zygoteAnimLabel' : ''
+              }`}
+            >
+              {field.label} {field.span ? field.span : null}
+            </label>
             <select
+              id={field.name}
               type="text"
               className={`${field.class}`}
               name={field.name}
               onChange={this.update}
-              value={user.shipping[field.formattedName]}
-              style={
-                user.shipping[field.formattedName] ? { color: '#666667' } : {}
-              }
+              onFocus={() => this.setState({ [field.name]: true })}
+              onBlur={() => this.setState({ [field.name]: false })}
+              value={inputValue}
+              style={inputValue ? { color: '#666667' } : {}}
             >
-              <option disabled value="">
-                State
-              </option>
+              <option disabled value="" />
               {field.options.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -252,46 +276,103 @@ export default class Shipping extends Component {
             } ${field.class}Container`}
           >
             {field.name === 'Address' ? (
-              <AutoComplete
-                type={field.type}
-                className={field.class}
-                onChange={this.update}
-                googleApiKey={this.props.googleApiKey || null}
-                getValue={this.addressSearch}
-                name={field.name}
-                value={user.shipping[field.formattedName]}
-                onKeyPress={field.name === 'Zip' ? this.onKeyPress : null}
-                placeholder={`${field.label} ${field.span ? field.span : ''}`}
-              />
+              <div className="zygoteInputWrapper">
+                <label
+                  htmlFor={field.name}
+                  aria-required="false"
+                  className={`zygoteInputLabel ${
+                    this.state[field.name] || inputValue
+                      ? 'zygoteAnimLabel'
+                      : ''
+                  }`}
+                >
+                  {field.label} {field.span ? field.span : null}
+                </label>
+                <AutoComplete
+                  id={field.name}
+                  type={field.type}
+                  className={field.class}
+                  onChange={this.update}
+                  googleApiKey={this.props.googleApiKey || null}
+                  onFocus={() => this.setState({ [field.name]: true })}
+                  onBlur={e => {
+                    this.setState({ [field.name]: false })
+                    this.validate(e)
+                  }}
+                  getValue={this.addressSearch}
+                  name={field.name}
+                  value={inputValue}
+                  onKeyPress={field.name === 'Zip' ? this.onKeyPress : null}
+                  placeholder={`${field.label} ${field.span ? field.span : ''}`}
+                />
+              </div>
             ) : field.name === 'Phone' ? (
-              <MaskedInput
-                mask={'(111) 111 - 1111'}
-                placeholderChar=" "
-                type={field.type}
-                className={field.class}
-                name={field.name}
-                onChange={this.update}
-                onFocus={e => {
-                  e.target.placeholder = ''
-                }}
-                onBlur={e => {
-                  e.target.placeholder = `${field.label} ${
-                    field.span ? field.span : ''
-                  }`
-                }}
-                value={user.shipping[field.formattedName]}
-                placeholder={`${field.label} ${field.span ? field.span : ''}`}
-              />
+              <div className="zygoteInputWrapper">
+                <label
+                  htmlFor={field.name}
+                  aria-required="false"
+                  className={`zygoteInputLabel ${
+                    this.state[field.name] || inputValue
+                      ? 'zygoteAnimLabel'
+                      : ''
+                  }`}
+                >
+                  {field.label} {field.span ? field.span : null}
+                </label>
+                <MaskedInput
+                  id={field.name}
+                  mask={'(111) 111 - 1111'}
+                  placeholderChar=" "
+                  type={field.type}
+                  className={field.class}
+                  name={field.name}
+                  onChange={this.update}
+                  onFocus={e => {
+                    e.target.placeholder = ''
+                    this.setState({ [field.name]: true })
+                  }}
+                  onBlur={e => {
+                    e.target.placeholder = `${field.label} ${
+                      field.span ? field.span : ''
+                    }`
+                    this.validate(e)
+                    this.setState({ [field.name]: false })
+                  }}
+                  value={inputValue}
+                  placeholder={`${field.label} ${field.span ? field.span : ''}`}
+                />
+              </div>
             ) : (
-              <input
-                type={field.type}
-                className={field.class}
-                onChange={this.update}
-                name={field.name}
-                value={user.shipping[field.formattedName]}
-                onKeyPress={field.name === 'Zip' ? this.onKeyPress : null}
-                placeholder={`${field.label} ${field.span ? field.span : ''}`}
-              />
+              <div className="zygoteInputWrapper">
+                <label
+                  aria-required="false"
+                  htmlFor={field.name}
+                  className={`zygoteInputLabel ${
+                    this.state[field.name] || inputValue
+                      ? 'zygoteAnimLabel'
+                      : ''
+                  }`}
+                >
+                  {field.label} {field.span ? field.span : null}
+                </label>
+                <input
+                  type={field.type}
+                  id={field.name}
+                  className={field.class}
+                  onChange={this.update}
+                  name={field.name}
+                  onBlur={e => {
+                    this.validate(e)
+                    if (!inputValue) {
+                      this.setState({ [field.name]: false })
+                    }
+                  }}
+                  onFocus={() => this.setState({ [field.name]: true })}
+                  value={inputValue}
+                  onKeyPress={field.name === 'Zip' ? this.onKeyPress : null}
+                  placeholder={`${field.label} ${field.span ? field.span : ''}`}
+                />
+              </div>
             )}
 
             {inputErrors ? (
@@ -316,7 +397,7 @@ export default class Shipping extends Component {
           return (
             <div className="zygoteStep2 zygoteStep">
               <div className="zygoteTable">
-                <div className="zygoteRow">
+                <div className={`zygoteRow`}>
                   <div
                     className="zygoteOrderSummaryBanner"
                     style={
@@ -363,26 +444,18 @@ export default class Shipping extends Component {
                       )}
                     </div>
                   </div>
-
-                  <div className={`zygoteOrderSummary`}>
-                    <OrderSummary
-                      isMounted={this.state.showSummary}
-                      delayTime={250}
-                      animate={true}
-                    />
+                </div>
+                <div className="overflowWrapper">
+                  <div
+                    className={`zygoteRowAnim ${
+                      this.state.showSummary ? 'zygoteAnim' : ''
+                    }`}
+                  >
+                    <OrderSummary />
                   </div>
                 </div>
-                <div
-                  className={`zygoteRow zygoteRowAnim  ${this.state.class}`}
-                  style={
-                    (cart.errors || cart.apiErrors) && this.state.showSummary
-                      ? {
-                          marginBottom: `calc(77% + ${errorLen} * 8px)`,
-                          marginTop: `calc(50px - ${errorLen} * 10px`
-                        }
-                      : {}
-                  }
-                >
+
+                <div className={`zygoteRow`}>
                   <form action="" className="zygoteForm">
                     {yourDetails.sections.map((section, i) => {
                       return (
